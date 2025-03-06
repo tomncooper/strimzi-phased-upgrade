@@ -26,7 +26,7 @@ This approach allows for controlled, incremental upgrades of Strimzi Kafka compo
 The main script `download-install-files.sh` downloads the Strimzi Cluster Operator resources from a specific git tag and adds them to the overall installation set.
 
 ```shell
-./scripts/download-install-files.sh <git-tag> [--keep-crds | --upgrade-crds]
+./scripts/download-install-files.sh <git-tag> [--keep-crds | --upgrade-crds] [--namespace=NAMESPACE] 
 ```
 
 Options:
@@ -34,12 +34,16 @@ Options:
 - `<git-tag>`: Required. The Strimzi git tag to download (e.g., 0.43.0)
 - `--keep-crds`: Keep CRD YAML files in the operator directory (default is to delete them). This is for development.
 - `--upgrade-crds`: This option allows you to specify that the CRDs from this git-tag should be used as the global CRDs for teh installation set. It will move the CRD files to the install-files/crds directory and add a version suffix to the filenames. 
+- `--namespace=NAMESPACE`: Set the target namespace for the operator installation. If not specified, the namespace will not be set in the resources.
 
 ```shell
 # Download version 0.43.0, removing its CRDs (the default behavior)
 ./scripts/download-install-files.sh 0.43.0
 
-# Download version 0.44.0 and upgrade the global CRDs to be that version's
-./scripts/download-install-files.sh 0.44.0 --upgrade-crds
+# Download version 0.44.0 and set the target namespace to 'kafka-system'
+./scripts/download-install-files.sh 0.44.0 --namespace=kafka-system
+
+# Download version 0.45.0 and upgrade the global CRDs to be that version's
+./scripts/download-install-files.sh 0.45.0 --namespace=kafka-system --upgrade-crds
 
 ```

@@ -1,3 +1,6 @@
 - op: replace
-  path: /roleRef/name
-  value: $(roleRef.name)-${GIT_TAG}
+  path: /subjects/0/name
+  value: strimzi-cluster-operator-${SANITIZED_GIT_TAG}
+- op: replace
+  path: /subjects/0/namespace
+  value: ${NAMESPACE}

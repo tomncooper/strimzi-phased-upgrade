@@ -5,8 +5,11 @@ metadata:
 spec:
   template:
     spec:
-      serviceAccountName: strimzi-cluster-operator-${GIT_TAG}
-      volumes:
-        - name: co-config-volume
-          configMap:
-            name: strimzi-cluster-operator-${GIT_TAG}
+      containers:
+        - name: strimzi-cluster-operator
+          env:
+            - name: STRIMZI_NAMESPACE
+              value: "*" 
+              valueFrom: null
+            - name: STRIMZI_CUSTOM_RESOURCE_SELECTOR
+              value: strimzi-resource-selector=strimzi-${SANITIZED_GIT_TAG}

@@ -39,11 +39,12 @@ generate_resources_list() {
 
 # Function to show usage information
 show_usage() {
-  echo "Usage: $0 <git-tag> [--keep-crds | --upgrade-crds]"
+  echo "Usage: $0 <git-tag> [--keep-crds | --upgrade-crds] [--namespace=NAMESPACE]"
   echo
   echo "Options:"
   echo "  --keep-crds           Keep all CRD YAML files (default is to delete them)"
   echo "  --upgrade-crds        Use the CRD YAML files to replace those in the install-files/crds directory"
+  echo "  --namespace=NAMESPACE Set the namespace for all resources (default: unspecified)"
 }
 
 # Check if a tag argument was provided
@@ -58,6 +59,7 @@ GIT_TAG=$1
 shift
 
 CRD_ACTION="delete"  # Default action is to delete CRDs
+NAMESPACE=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -67,6 +69,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --upgrade-crds)
       CRD_ACTION="move"
+      shift
+      ;;
+    --namespace=*)
+      NAMESPACE="${1#*=}"
       shift
       ;;
     *)
@@ -81,12 +87,18 @@ done
 TEMP_DIR=$(mktemp -d)
 TARGET_DIR="install-files/cluster-operator-${GIT_TAG}"
 CRD_TARGET_DIR="install-files/crds"
+# Generate a sanitized version of the git tag for use in resource names
+# Replace dots with dashes for Kubernetes compatibility
+SANITIZED_GIT_TAG="${GIT_TAG//./\-}"
 
 # Create target directory if it doesn't exist
 mkdir -p "$TARGET_DIR"
 
 echo "Downloading Strimzi resources for tag: $GIT_TAG"
 echo "Target directory: $TARGET_DIR"
+if [ -n "$NAMESPACE" ]; then
+  echo "Target namespace: $NAMESPACE"
+fi
 
 # Clone the repository to a temporary directory
 echo "Cloning repository..."
@@ -125,7 +137,7 @@ elif [ "$CRD_ACTION" = "move" ]; then
     base_name="${filename%.*}"
     extension="${filename##*.}"
     # Copy to the CRD directory with the tag as a suffix before the extension
-    cp "$file" "$CRD_TARGET_DIR/${base_name}-${GIT_TAG}.${extension}"
+    cp "$file" "$CRD_TARGET_DIR/${base_name}-${SANITIZED_GIT_TAG}.${extension}"
     # Remove the original file
     rm "$file"
   done
@@ -143,7 +155,25 @@ if [ -f "$TARGET_DIR/kustomization.yaml" ]; then
   rm -f "$TARGET_DIR/kustomization.yaml"
 fi
 
-export GIT_TAG
+# Export variables for template substitution
+export SANITIZED_GIT_TAG
+export NAMESPACE
+
+echo "Generating ClusterRoleBindings for cluster-wide reconciliation"
+
+KUBECTL_CREATE="kubectl create --dry-run=client -o yaml"
+
+$KUBECTL_CREATE clusterrolebinding strimzi-cluster-operator-namespaced \
+--clusterrole=strimzi-cluster-operator-namespaced \
+--serviceaccount $NAMESPACE:strimzi-cluster-operator > $TARGET_DIR/strimzi-cluster-operator-namespaced.yaml
+
+$KUBECTL_CREATE clusterrolebinding strimzi-cluster-operator-watched \
+--clusterrole=strimzi-cluster-operator-watched \
+--serviceaccount $NAMESPACE:strimzi-cluster-operator > $TARGET_DIR/strimzi-cluster-operator-watched.yaml
+
+$KUBECTL_CREATE clusterrolebinding strimzi-cluster-operator-entity-operator-delegation \
+--clusterrole=strimzi-entity-operator \
+--serviceaccount $NAMESPACE:strimzi-cluster-operator > $TARGET_DIR/strimzi-cluster-operator-entity-operator-delegation.yaml
 
 echo "Generating kustomization.yaml file..."
 # Generate resources list for the target directory
@@ -175,10 +205,13 @@ fi
 # Create top level kustomization.yaml file
 generate_resources_list $INSTALL_DIR
 
+unset $SANITIZED_GIT_TAG
+unset $NAMESPACE
+
 # Clean up temporary directory
 rm -rf "$TEMP_DIR"
-unset $GIT_TAG
-
 echo "Temporary files cleaned up"
 
-echo "Done! Strimzi cluster operator resources for tag $GIT_TAG are ready."
+echo "Done! Strimzi cluster operator resources for tag $GIT_TAG have been added to the installation set"
+printf "\nFor resources to be managed by this operator add the following label:\n"
+printf "\nstrimzi-resource-selector=strimzi-$SANITIZED_GIT_TAG\n\n" 
