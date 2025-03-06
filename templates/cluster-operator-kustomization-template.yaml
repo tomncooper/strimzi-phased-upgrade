@@ -1,0 +1,15 @@
+
+nameSuffix: '-${GIT_TAG}'
+
+patches:
+  # Update ConfigMap reference in Deployment
+  - path: patches/patch-deployment.yaml
+    target:
+      kind: Deployment
+      name: strimzi-cluster-operator
+
+  # Update ClusterRole references in RoleBindings and ClusterRoleBindings
+  - path: patches/patch-role-references.yaml
+    target:
+      kind: (RoleBinding|ClusterRoleBinding)
+      name: ".*"

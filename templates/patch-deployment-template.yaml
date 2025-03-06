@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: strimzi-cluster-operator
+spec:
+  template:
+    spec:
+      serviceAccountName: strimzi-cluster-operator-${GIT_TAG}
+      volumes:
+        - name: co-config-volume
+          configMap:
+            name: strimzi-cluster-operator-${GIT_TAG}
