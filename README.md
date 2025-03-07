@@ -1,4 +1,4 @@
-# Strimzi Blast Radius Upgrade Demo
+# Strimzi Phased Upgrade Demo
 
 This repository contains scripts and resources for demonstrating a phased upgrade process for the Strimzi Kafka Operator.
 This allows users to control the blast radius of those upgrades by deploying multiple Strimzi versions simultaneously and handing control of Kafka clusters between them using labels. 
@@ -68,7 +68,7 @@ kubectl -n strimzi get deployments <operator-deployment-name> -o json | \
     '.spec.template.spec.containers[0].env.[] | select(.name == $name) | .value'
 ```
 
-For example move `test-kafka-1` from the 0.43 operator to the 0.44: 
+For example, to move `test-kafka-1` from the 0.43 operator to the 0.44: 
 ```shell
 kubectl -n kafka label --overwrite kafka test-kafka-1 strimzi-resource-selector=strimzi-0-44-0
 ```
