@@ -1,0 +1,36 @@
+resources:
+  - 010-ServiceAccount-strimzi-cluster-operator.yaml
+  - 020-ClusterRole-strimzi-cluster-operator-role.yaml
+  - 020-RoleBinding-strimzi-cluster-operator.yaml
+  - 021-ClusterRoleBinding-strimzi-cluster-operator.yaml
+  - 021-ClusterRole-strimzi-cluster-operator-role.yaml
+  - 022-ClusterRole-strimzi-cluster-operator-role.yaml
+  - 022-RoleBinding-strimzi-cluster-operator.yaml
+  - 023-ClusterRole-strimzi-cluster-operator-role.yaml
+  - 023-RoleBinding-strimzi-cluster-operator.yaml
+  - 030-ClusterRoleBinding-strimzi-cluster-operator-kafka-broker-delegation.yaml
+  - 030-ClusterRole-strimzi-kafka-broker.yaml
+  - 031-ClusterRole-strimzi-entity-operator.yaml
+  - 031-RoleBinding-strimzi-cluster-operator-entity-operator-delegation.yaml
+  - 033-ClusterRoleBinding-strimzi-cluster-operator-kafka-client-delegation.yaml
+  - 033-ClusterRole-strimzi-kafka-client.yaml
+  - 050-ConfigMap-strimzi-cluster-operator.yaml
+  - 060-Deployment-strimzi-cluster-operator.yaml
+  - strimzi-cluster-operator-entity-operator-delegation.yaml
+  - strimzi-cluster-operator-namespaced.yaml
+  - strimzi-cluster-operator-watched.yaml
+
+nameSuffix: '-0-45-0'
+
+patches:
+  # Update ConfigMap reference in Deployment
+  - path: patches/patch-deployment.yaml
+    target:
+      kind: Deployment
+      name: strimzi-cluster-operator
+
+  # Update ClusterRole references in RoleBindings and ClusterRoleBindings
+  - path: patches/patch-role-references.yaml
+    target:
+      kind: (RoleBinding|ClusterRoleBinding)
+      name: ".*"

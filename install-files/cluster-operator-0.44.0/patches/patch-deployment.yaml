@@ -12,6 +12,6 @@ spec:
               value: "*" 
               valueFrom: null
             - name: STRIMZI_CUSTOM_RESOURCE_SELECTOR
-              value: strimzi-resource-selector=strimzi-${SANITIZED_GIT_TAG}
+              value: strimzi-resource-selector=strimzi-0-44-0
             - name: STRIMZI_LEADER_ELECTION_LEASE_NAME
-              value: "strimzi-cluster-operator-${SANITIZED_GIT_TAG}"
+              value: "strimzi-cluster-operator-0-44-0"

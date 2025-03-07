@@ -1,0 +1,6 @@
+- op: replace
+  path: /subjects/0/name
+  value: strimzi-cluster-operator-0-43-0
+- op: replace
+  path: /subjects/0/namespace
+  value: strimzi
