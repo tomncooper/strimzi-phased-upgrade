@@ -39,12 +39,12 @@ generate_resources_list() {
 
 # Function to show usage information
 show_usage() {
-  echo "Usage: $0 <git-tag> [--keep-crds | --upgrade-crds] [--namespace=NAMESPACE]"
+  echo "Usage: $0 <git-tag> --namespace=NAMESPACE [--keep-crds | --upgrade-crds]"
   echo
   echo "Options:"
+  echo "  --namespace=NAMESPACE Set the namespace for all resources (required)"
   echo "  --keep-crds           Keep all CRD YAML files (default is to delete them)"
   echo "  --upgrade-crds        Use the CRD YAML files to replace those in the install-files/crds directory"
-  echo "  --namespace=NAMESPACE Set the namespace for all resources (default: unspecified)"
 }
 
 # Check if a tag argument was provided
@@ -83,6 +83,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Check if namespace was provided
+if [ -z "$NAMESPACE" ]; then
+  echo "Error: Namespace is required. Please provide it using --namespace=NAMESPACE"
+  show_usage
+  exit 1
+fi
+
 # Set variables
 TEMP_DIR=$(mktemp -d)
 TARGET_DIR="install-files/cluster-operator-${GIT_TAG}"
@@ -96,9 +103,7 @@ mkdir -p "$TARGET_DIR"
 
 echo "Downloading Strimzi resources for tag: $GIT_TAG"
 echo "Target directory: $TARGET_DIR"
-if [ -n "$NAMESPACE" ]; then
-  echo "Target namespace: $NAMESPACE"
-fi
+echo "Target namespace: $NAMESPACE"
 
 # Clone the repository to a temporary directory
 echo "Cloning repository..."
@@ -214,4 +219,4 @@ echo "Temporary files cleaned up"
 
 echo "Done! Strimzi cluster operator resources for tag $GIT_TAG have been added to the installation set"
 printf "\nFor resources to be managed by this operator add the following label:\n"
-printf "\nstrimzi-resource-selector=strimzi-$SANITIZED_GIT_TAG\n\n" 
+printf "\nstrimzi-resource-selector=strimzi-$SANITIZED_GIT_TAG\n\n"
