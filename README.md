@@ -16,24 +16,20 @@ This allows users to control the blast radius of those upgrades by deploying mul
 The main script `download-install-files.sh` downloads the Strimzi Cluster Operator resources from a specific git tag and adds them to the overall Operator installation set.
 
 ```shell
-./scripts/download-install-files.sh <git-tag> [--keep-crds | --upgrade-crds] [--namespace=NAMESPACE] 
+./scripts/download-install-files.sh <git-tag> --namespace=NAMESPACE [--keep-crds | --upgrade-crds]
 ```
 
 Options:
 
 - `<git-tag>`: Required. The Strimzi git tag to download (e.g., 0.43.0)
+- `--namespace=NAMESPACE`: (required) Set the target namespace for the operator installation. If not specified, the namespace will not be set in the resources.
 - `--keep-crds`: Keep CRD YAML files in the operator directory (default is to delete them). This is for development.
 - `--upgrade-crds`: This option allows you to specify that the CRDs from this git-tag should be used as the global CRDs for teh installation set. It will move the CRD files to the install-files/crds directory and add a version suffix to the filenames. 
-- `--namespace=NAMESPACE`: Set the target namespace for the operator installation. If not specified, the namespace will not be set in the resources.
-
 Examples:
 
 ```shell
-# Download version 0.43.0, removing its CRDs (the default behavior), this will leave the operator namespace as 'my-project'
-./scripts/download-install-files.sh 0.43.0
-
-# Download version 0.44.0 and set the operator namespace to 'strimzi'
-./scripts/download-install-files.sh 0.44.0 --namespace=stimzi
+# Download version 0.43.0, removing its CRDs (the default behavior) and setting the namespace to `strimzi`
+./scripts/download-install-files.sh 0.43.0 --namespace=strimzi
 
 # Download version 0.45.0, set the operator namespace and upgrade the global CRDs to be that version's
 ./scripts/download-install-files.sh 0.45.0 --namespace=strimzi --upgrade-crds
@@ -42,7 +38,15 @@ Examples:
 
 ### Installing the operator set
 
-Once you have added all the versions you wish to support and designated the most recent versions CRDs (using the `--upgrade-crds` flag), you can install the Operator set by running:
+Once you have added all the versions you wish to support and designated the most recent versions CRDs (using the `--upgrade-crds` flag), you can preview the set of install resources using:
+
+
+```shell
+kubectl kustomize install-files
+```
+
+Or you can render a single directory by specifying it rather than the top level `install-files`.
+You can install the full Operator set by running:
 
 ```shell
 kubectl -n strimzi apply -k install-files
@@ -68,8 +72,9 @@ kubectl -n strimzi get deployments <operator-deployment-name> -o json | \
     '.spec.template.spec.containers[0].env.[] | select(.name == $name) | .value'
 ```
 
-For example, to move `test-kafka-1` from the 0.43 operator to the 0.44: 
+For example, to move `kafka-a` from the 0.43 operator to the 0.44: 
+
 ```shell
-kubectl -n kafka label --overwrite kafka test-kafka-1 strimzi-resource-selector=strimzi-0-44-0
+kubectl -n kafka label --overwrite kafka kafka-a strimzi-resource-selector=strimzi-0-44-0
 ```
 
