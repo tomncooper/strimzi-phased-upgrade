@@ -1,12 +1,12 @@
 resources:
-  - 040-Crd-kafka-0-45-0.yaml
-  - 041-Crd-kafkaconnect-0-45-0.yaml
-  - 042-Crd-strimzipodset-0-45-0.yaml
-  - 043-Crd-kafkatopic-0-45-0.yaml
-  - 044-Crd-kafkauser-0-45-0.yaml
-  - 045-Crd-kafkamirrormaker-0-45-0.yaml
-  - 046-Crd-kafkabridge-0-45-0.yaml
-  - 047-Crd-kafkaconnector-0-45-0.yaml
-  - 048-Crd-kafkamirrormaker2-0-45-0.yaml
-  - 049-Crd-kafkarebalance-0-45-0.yaml
-  - 04A-Crd-kafkanodepool-0-45-0.yaml
+  - 040-Crd-kafka-0-44-0.yaml
+  - 041-Crd-kafkaconnect-0-44-0.yaml
+  - 042-Crd-strimzipodset-0-44-0.yaml
+  - 043-Crd-kafkatopic-0-44-0.yaml
+  - 044-Crd-kafkauser-0-44-0.yaml
+  - 045-Crd-kafkamirrormaker-0-44-0.yaml
+  - 046-Crd-kafkabridge-0-44-0.yaml
+  - 047-Crd-kafkaconnector-0-44-0.yaml
+  - 048-Crd-kafkamirrormaker2-0-44-0.yaml
+  - 049-Crd-kafkarebalance-0-44-0.yaml
+  - 04A-Crd-kafkanodepool-0-44-0.yaml
