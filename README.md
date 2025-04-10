@@ -3,6 +3,8 @@
 This repository contains scripts and resources for demonstrating a phased upgrade process for the Strimzi Kafka Operator.
 This allows users to control the blast radius of those upgrades by deploying multiple Strimzi versions simultaneously and handing control of Kafka clusters between them using labels. 
 
+It is based on [this post](https://strimzi.io/blog/2025/04/10/phased-strimzi-upgrade-example/) from the upstream Strimzi blog.
+
 ## Key Components
 
 - **download-install-files.sh**: Script that downloads Strimzi operator resources from a specific git tag and sets up the various Kustomization files and patches needed to alter the install files.
@@ -72,9 +74,12 @@ kubectl -n strimzi get deployments <operator-deployment-name> -o json | \
     '.spec.template.spec.containers[0].env.[] | select(.name == $name) | .value'
 ```
 
-For example, to move `kafka-a` from the 0.43 operator to the 0.44: 
+For example, to move `kafka-a` from the 0.43 operator to the 0.44, first pause the reconciliation, wait for acknowledgement the pause has been set, change the label and unpause: 
 
 ```shell
+kubectl -n kafka annotate kafka kafka-a strimzi.io/pause-reconciliation="true"
+kubectl -n kafka wait kafka/kafka-a --for=condition=ReconciliationPaused --timeout=300s
 kubectl -n kafka label --overwrite kafka kafka-a strimzi-resource-selector=strimzi-0-44-0
+kubectl -n kafka annotate kafka kafka-a strimzi.io/pause-reconciliation="false"
 ```
 
